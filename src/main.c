@@ -40,22 +40,13 @@ int main(void)
     cli_init();
     configure_console();
 
-    puts("\r\n\r\nsam4d32c blinky demo...\r\n");
-
-    for (int i=0; i<10; i++) {
-        printf(".");
-        delay_ms(100);
-    }
-    printf("\r\n");
+    // TODO: Only uncomment when you have the USART setup and ready to go
+    // puts("\r\n\r\nsam4d32c blinky demo...\r\n");
 
     while(1) {
 
-        if(ioport_get_pin_level(BUTTON_0_PIN) == BUTTON_0_ACTIVE) {
-            ioport_toggle_pin_level(LED0_GPIO);
-            delay_ms(500); 
-        }
-
-
+        ioport_toggle_pin_level(LED0_GPIO);
+        delay_ms(250); 
     }
 }
 
