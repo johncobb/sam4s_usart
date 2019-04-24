@@ -66,6 +66,7 @@ CSRCS = \
        ../cph/cph_millis.c                                  \
        ../cph/cph_console.c                                 \
        ../cph/cph_cli.c                                     \
+       ../cph/cph_uart.c                                    \
        sam/boards/sam4s_xplained_pro/init.c                 \
        sam/drivers/pio/pio.c                                \
        sam/drivers/pio/pio_handler.c                        \
