@@ -18,6 +18,7 @@
 void app_init(void);
 bool app_timeout(clock_time_t);
 void app_settimer(clock_time_t *, clock_time_t);
+void load_uart_config(void);
 
 typedef struct {
     clock_time_t log_timer;
@@ -53,15 +54,29 @@ int main(void)
     config_init();
     cph_millis_init();
 
-    uart_handler.uart_init = uart_uart1_init;
-    uart_handler.uart_init();
-    // uart_uart1_init();
+    const sam_uart_opt_t sam_uart_opt = {
+        sysclk_get_cpu_hz(),
+        UART1_SERIAL_BAUDRATE, 
+        UART1_SERIAL_MODE
+    };
+
+    const uart_cfg_t u_cfg = {
+        sam_uart_opt,
+        UART1,
+        ID_UART1,
+        PINS_UART1_PIO,
+        PINS_UART1_TYPE,
+        PINS_UART1_MASK,
+        PINS_UART1_ATTR,
+        UART1_IRQn,
+        UART_IER_RXRDY
+    };
+    
+    /* configure uart */
+    lib_uart_cfg(&u_cfg);
 
     /* initialize variables and callbacks for our task processor */
     app_init();
-
-
-    
 
     while(1) {
 
@@ -76,7 +91,8 @@ int main(void)
             sprintf(buffer, data, g_cph_millis);
 
             // write to uart1
-            uart_uart1_write_bytes(buffer, sizeof(data));
+            // uart_uart1_write_bytes(buffer, sizeof(data));
+            lib_uart_writebytes(&u_cfg, buffer, sizeof(data));
             // set_timer(1000);
             app_settimer(&app_timer.log_timer, 1000);
         }
@@ -87,7 +103,8 @@ int main(void)
             app_settimer(&app_timer.led_timer, 50);
         }
         
-        uart_uart1_tick();
+        /* process any data on uart */
+        lib_uart_tick(&u_cfg);
 
         delay_ms(25);
     }

@@ -38,6 +38,15 @@ typedef struct uart_cfg {
     uint32_t ul_irq;
     uint32_t ul_source;
 } uart_cfg_t;
+
+typedef struct{
+    uart_cfg_t uart_cfg;
+	char *tx_buff;
+	uint32_t tx_len;
+	char *rx_buff;
+	uint32_t rx_len;
+	uint32_t baudrate;
+} uart_conf_t;
 /* end */
 
 
@@ -49,6 +58,14 @@ typedef void (*uart_ondatareceive_func_t)(uint8_t *buffer, uint32_t len);
 typedef struct{
     uart_ondatareceive_func_t on_datareceive;
 } uart_event_handler_t;
+
+
+void lib_uart_cfg(uart_cfg_t *);
+uint32_t lib_uart_rxready(uart_cfg_t *);
+uint8_t lib_uart_read(uart_cfg_t *);
+void lib_uart_write(uart_cfg_t *, uint8_t);
+void lib_uart_writebytes(uart_cfg_t *, char*, int);
+void lib_uart_tick(uart_cfg_t *);
 
 void uart_uart1_init(void);
 void uart_uart1_tick(void);
