@@ -9,53 +9,19 @@ uint8_t uc_flag;
 uart_cfg_t uart_cfg;
 uart_event_handler_t uart_evt;
 
-// uart_config
-// void uart_config(void) {
-
-//     const sam_uart_opt_t sam_uart_opt = {
-//         sysclk_get_cpu_hz(),
-//         UART1_SERIAL_BAUDRATE, 
-//         UART1_SERIAL_MODE
-//     };
-
-
-//     const uart_cfg_t u_cfg = {
-//         sam_uart_opt,
-//         UART1,
-//         ID_UART1,
-//         PINS_UART1_PIO,
-//         PINS_UART1_TYPE,
-//         PINS_UART1_MASK,
-//         PINS_UART1_ATTR,
-//         UART1_IRQn,
-//         UART_IER_RXRDY
-//     };
-
-//     sysclk_init();
-//     pio_configure(u_cfg.p_pio, u_cfg.pio_type, u_cfg.ul_mask, u_cfg.ul_attribute);
-//     pmc_enable_periph_clk(u_cfg.uart_id);
-//     uart_init(u_cfg.p_uart, &u_cfg.sam_uart_opt);
-
-//     uart_enable_interrupt(u_cfg.p_pio, u_cfg.ul_source);   //Interrupt reading ready
-//     NVIC_EnableIRQ(u_cfg.ul_irq);
-    
-// }
-
 void lib_uart_cfg(uart_cfg_t *uart_cfg) {
 
-    uart_cfg_t u_cfg = *uart_cfg;
+    // cast to a uart_cfg_t so we can reference by .notation
+    uart_cfg_t u_cfg = (*uart_cfg);
 
     sysclk_init();
     pio_configure(u_cfg.p_pio, u_cfg.pio_type, u_cfg.ul_mask, u_cfg.ul_attribute);
     pmc_enable_periph_clk(u_cfg.uart_id);
     uart_init(u_cfg.p_uart, &u_cfg.sam_uart_opt);
 
-    uart_enable_interrupt(u_cfg.p_pio, u_cfg.ul_source);   //Interrupt reading ready
-    NVIC_EnableIRQ(u_cfg.ul_irq);
-    
+    // uart_enable_interrupt(u_cfg.p_pio, u_cfg.ul_source);   //Interrupt reading ready
+    // NVIC_EnableIRQ(u_cfg.ul_irq);
 }
-
-
 
 void uart_set_ondatareceive_func(uart_ondatareceive_func_t func)
 {
@@ -63,14 +29,13 @@ void uart_set_ondatareceive_func(uart_ondatareceive_func_t func)
     // uart_evt.on_datareceive = func;
 }
 
-
 void lib_uart_tick(uart_cfg_t * u_cfg) {
     if (lib_uart_rxready(u_cfg)) {
         uint8_t data = lib_uart_read(u_cfg);
+        u_cfg->on_datareceive(data, 1);
         //uart_evt.on_datareceive(data, 1);
     }
 }
-
 
 uint32_t lib_uart_rxready(uart_cfg_t * u_cfg) {
     return uart_is_tx_ready(u_cfg->p_uart);
@@ -98,13 +63,13 @@ void lib_uart_writebytes(uart_cfg_t * u_cfg, char* data, int size) {
 	}
 }
 
-void UART1_Handler() {
-   uint32_t dw_status = uart_get_status(UART1);
+// void UART1_Handler() {
+//    uint32_t dw_status = uart_get_status(UART1);
    
 
-   if(dw_status & UART_SR_RXRDY) {
-      uint8_t received_byte;
-      uart_read(UART1, &received_byte);
-      uart_evt.on_datareceive(received_byte, 1);
-   }
-}
+//    if(dw_status & UART_SR_RXRDY) {
+//       uint8_t received_byte;
+//       uart_read(UART1, &received_byte);
+//       uart_evt.on_datareceive(received_byte, 1);
+//    }
+// }

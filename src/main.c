@@ -17,6 +17,7 @@
 
 void app_init(void);
 bool app_timeout(clock_time_t);
+// void app_settimer(clock_time_t *, clock_time_t);
 void app_settimer(clock_time_t *, clock_time_t);
 void load_uart_config(void);
 
@@ -25,15 +26,15 @@ typedef struct {
     clock_time_t led_timer;
 } app_timer_t;
 
-app_timer_t app_timer;
+volatile app_timer_t app_timer;
 
 
 void uart_ondatareceived(uint8_t *buffer, uint32_t len);
 
 void uart_ondatareceived(uint8_t *buffer, uint32_t len) {
-    ioport_toggle_pin_level(LED0_GPIO);
-    delay_ms(50);
-    ioport_toggle_pin_level(LED0_GPIO);
+    // ioport_toggle_pin_level(LED0_GPIO);
+    // delay_ms(50);
+    // ioport_toggle_pin_level(LED0_GPIO);
 }
 
 void app_init(void) {
@@ -41,7 +42,7 @@ void app_init(void) {
     app_timer.log_timer = 0;
     app_timer.led_timer = 0;
 
-    uart_set_ondatareceive_func(uart_ondatareceived);
+    // uart_set_ondatareceive_func(uart_ondatareceived);
 }
 
 uart_handler_t uart_handler;
@@ -69,7 +70,8 @@ int main(void)
         PINS_UART1_MASK,
         PINS_UART1_ATTR,
         UART1_IRQn,
-        UART_IER_RXRDY
+        UART_IER_RXRDY,
+        uart_ondatareceived
     };
     
     /* configure uart */
@@ -97,16 +99,16 @@ int main(void)
             app_settimer(&app_timer.log_timer, 1000);
         }
 
-        if ((app_timeout(app_timer.led_timer))) {
+        if ((app_timeout(&app_timer.led_timer))) {
             // toggle led
             ioport_toggle_pin_level(LED0_GPIO);
-            app_settimer(&app_timer.led_timer, 50);
+            app_settimer(&app_timer.led_timer, 250);
         }
         
         /* process any data on uart */
         lib_uart_tick(&u_cfg);
 
-        delay_ms(25);
+        delay_ms(50);
     }
 }
 
