@@ -28,7 +28,6 @@ typedef struct {
 
 volatile app_timer_t app_timer;
 
-
 void uart_ondatareceived(uint8_t *buffer, uint32_t len);
 
 void uart_ondatareceived(uint8_t *buffer, uint32_t len) {
@@ -41,11 +40,9 @@ void app_init(void) {
     // initialize timers to zero
     app_timer.log_timer = 0;
     app_timer.led_timer = 0;
-
-    // uart_set_ondatareceive_func(uart_ondatareceived);
 }
 
-uart_handler_t uart_handler;
+
 
 int main(void)
 {
@@ -87,7 +84,7 @@ int main(void)
             // buffer used to sprintf timestamp into message
             char buffer[64] = {0};
             // data used to store the message
-            char data[] = "Hello World\t%lu\r\n";
+            char data[] = "Ground Control...\t%lu\r\n";
 
             // copy the timstamp into data and store into buffer
             sprintf(buffer, data, g_cph_millis);
@@ -99,10 +96,10 @@ int main(void)
             app_settimer(&app_timer.log_timer, 1000);
         }
 
-        if ((app_timeout(&app_timer.led_timer))) {
+        if ((app_timeout(app_timer.led_timer))) {
             // toggle led
             ioport_toggle_pin_level(LED0_GPIO);
-            app_settimer(&app_timer.led_timer, 250);
+            app_settimer(&app_timer.led_timer, 100);
         }
         
         /* process any data on uart */

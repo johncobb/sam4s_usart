@@ -19,6 +19,10 @@ void lib_uart_cfg(uart_cfg_t *uart_cfg) {
     pmc_enable_periph_clk(u_cfg.uart_id);
     uart_init(u_cfg.p_uart, &u_cfg.sam_uart_opt);
 
+
+    uart_enable_tx(u_cfg.p_pio);
+    uart_enable_rx(u_cfg.p_pio);
+
     // uart_enable_interrupt(u_cfg.p_pio, u_cfg.ul_source);   //Interrupt reading ready
     // NVIC_EnableIRQ(u_cfg.ul_irq);
 }
@@ -33,13 +37,21 @@ void lib_uart_tick(uart_cfg_t * u_cfg) {
     if (lib_uart_rxready(u_cfg)) {
         uint8_t data = lib_uart_read(u_cfg);
         u_cfg->on_datareceive(data, 1);
-        //uart_evt.on_datareceive(data, 1);
     }
 }
 
 uint32_t lib_uart_rxready(uart_cfg_t * u_cfg) {
-    return uart_is_tx_ready(u_cfg->p_uart);
+    return uart_is_rx_ready(u_cfg->p_uart);
 }
+
+// uint8_t lib_uart_read(uart_cfg_t * u_cfg) {
+//  	if (lib_uart_rxready(u_cfg->p_uart)) {
+// 		uc_flag = uart_read(u_cfg->p_uart, &uc_char);
+// 		if (!uc_flag) {
+//             return uc_char;
+// 		}
+// 	}   
+// }
 
 uint8_t lib_uart_read(uart_cfg_t * u_cfg) {
  	if (uart_is_rx_ready(u_cfg->p_uart)) {
