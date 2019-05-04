@@ -20,6 +20,7 @@ bool app_timeout(clock_time_t);
 // void app_settimer(clock_time_t *, clock_time_t);
 void app_settimer(clock_time_t *, clock_time_t);
 void load_uart_config(void);
+void app_message(uart_cfg_t *, char *);
 
 typedef struct {
     clock_time_t log_timer;
@@ -28,12 +29,14 @@ typedef struct {
 
 volatile app_timer_t app_timer;
 
+
 void uart_ondatareceived(uint8_t *buffer, uint32_t len);
 
 void uart_ondatareceived(uint8_t *buffer, uint32_t len) {
     // ioport_toggle_pin_level(LED0_GPIO);
     // delay_ms(50);
     // ioport_toggle_pin_level(LED0_GPIO);
+
 }
 
 void app_init(void) {
@@ -41,7 +44,6 @@ void app_init(void) {
     app_timer.log_timer = 0;
     app_timer.led_timer = 0;
 }
-
 
 
 int main(void)
@@ -70,29 +72,22 @@ int main(void)
         UART_IER_RXRDY,
         uart_ondatareceived
     };
-    
+
     /* configure uart */
     lib_uart_cfg(&u_cfg);
 
     /* initialize variables and callbacks for our task processor */
     app_init();
 
+    app_message(&u_cfg, "Welcome to sam4s_uart example.\r\n");
     while(1) {
 
         if ((app_timeout(app_timer.log_timer))) {
+            // send a message every second
+            // app_message(&u_cfg);
+            // reset timer
 
-            // buffer used to sprintf timestamp into message
-            char buffer[64] = {0};
-            // data used to store the message
-            char data[] = "Ground Control...\t%lu\r\n";
-
-            // copy the timstamp into data and store into buffer
-            sprintf(buffer, data, g_cph_millis);
-
-            // write to uart1
-            // uart_uart1_write_bytes(buffer, sizeof(data));
-            lib_uart_writebytes(&u_cfg, buffer, sizeof(data));
-            // set_timer(1000);
+            app_message(&u_cfg, "Hello World, how are you?\r\n");
             app_settimer(&app_timer.log_timer, 1000);
         }
 
@@ -107,6 +102,20 @@ int main(void)
 
         delay_ms(50);
     }
+}
+
+void app_message(uart_cfg_t *uart_cfg, char *msg) {
+    // buffer used to sprintf timestamp into message
+    char buffer[64] = {0};
+    // data used to store the message
+    char data[] = "%lu    %s\r\n";
+
+    // copy the timstamp into data and store into buffer
+    sprintf(buffer, data, g_cph_millis, msg);
+
+    // write to uart1
+    // uart_uart1_write_bytes(buffer, sizeof(data));
+    lib_uart_writebytes(uart_cfg, buffer, sizeof(buffer));   
 }
 
 void app_settimer(clock_time_t *timer, clock_time_t timeout) {
