@@ -17,10 +17,12 @@
 
 void app_init(void);
 bool app_timeout(clock_time_t);
-// void app_settimer(clock_time_t *, clock_time_t);
 void app_settimer(clock_time_t *, clock_time_t);
 void load_uart_config(void);
 void app_message(uart_cfg_t *, char *);
+
+sam_uart_opt_t sam_uart_opt;
+uart_cfg_t u_cfg;
 
 typedef struct {
     clock_time_t log_timer;
@@ -33,10 +35,10 @@ volatile app_timer_t app_timer;
 void uart_ondatareceived(uint8_t *buffer, uint32_t len);
 
 void uart_ondatareceived(uint8_t *buffer, uint32_t len) {
-    // ioport_toggle_pin_level(LED0_GPIO);
-    // delay_ms(50);
-    // ioport_toggle_pin_level(LED0_GPIO);
 
+    ioport_toggle_pin_level(LED0_GPIO);
+    delay_ms(50);
+    ioport_toggle_pin_level(LED0_GPIO);
 }
 
 void app_init(void) {
@@ -45,6 +47,23 @@ void app_init(void) {
     app_timer.led_timer = 0;
 }
 
+void app_uart_init(void) {
+
+    sam_uart_opt.ul_mck = sysclk_get_cpu_hz();
+    sam_uart_opt.ul_baudrate = UART1_SERIAL_BAUDRATE;
+    sam_uart_opt.ul_mode = UART1_SERIAL_MODE;
+
+    u_cfg.sam_uart_opt = sam_uart_opt;
+    u_cfg.p_uart = UART1;
+    u_cfg.uart_id = ID_UART1;
+    u_cfg.p_pio = PINS_UART1_PIO;
+    u_cfg.pio_type = PINS_UART1_TYPE;
+    u_cfg.ul_mask = PINS_UART1_MASK;
+    u_cfg.ul_attribute = PINS_UART1_ATTR;
+    u_cfg.ul_irq = UART1_IRQn;
+    u_cfg.ul_source = UART_IER_RXRDY;
+    u_cfg.on_datareceive = uart_ondatareceived;
+}
 
 int main(void)
 {
@@ -54,24 +73,8 @@ int main(void)
     config_init();
     cph_millis_init();
 
-    const sam_uart_opt_t sam_uart_opt = {
-        sysclk_get_cpu_hz(),
-        UART1_SERIAL_BAUDRATE, 
-        UART1_SERIAL_MODE
-    };
-
-    const uart_cfg_t u_cfg = {
-        sam_uart_opt,
-        UART1,
-        ID_UART1,
-        PINS_UART1_PIO,
-        PINS_UART1_TYPE,
-        PINS_UART1_MASK,
-        PINS_UART1_ATTR,
-        UART1_IRQn,
-        UART_IER_RXRDY,
-        uart_ondatareceived
-    };
+    /* init uart */
+    app_uart_init();
 
     /* configure uart */
     lib_uart_cfg(&u_cfg);
@@ -87,7 +90,7 @@ int main(void)
             // app_message(&u_cfg);
             // reset timer
 
-            app_message(&u_cfg, "Hello World, how are you?\r\n");
+            app_message(&u_cfg, "Hello World!\r\n");
             app_settimer(&app_timer.log_timer, 1000);
         }
 
@@ -96,9 +99,6 @@ int main(void)
             ioport_toggle_pin_level(LED0_GPIO);
             app_settimer(&app_timer.led_timer, 100);
         }
-        
-        /* process any data on uart */
-        lib_uart_tick(&u_cfg);
 
         delay_ms(50);
     }
@@ -129,4 +129,29 @@ bool app_timeout(clock_time_t timer) {
 
     return false;
 }
+
+
+
+// void config_usart(void) {
+
+
+//     const sam_usart_opt_t usart_console_settings = {
+//         USART_SERIAL_BAUDRATE,
+//         USART_SERIAL_CHAR_LENGTH,
+//         USART_SERIAL_PARITY,
+//         USART_SERIAL_STOP_BIT,
+//         US_MR_CHMODE_NORMAL
+//     };
+
+//     sysclk_enable_peripheral_clock(USART_SERIAL_ID);
+
+//     usart_init_rs232(USART_SERIAL, &usart_console_settings, sysclk_get_main_hz());
+//     usart_enable_tx(USART_SERIAL);
+//     usart_enable_rx(USART_SERIAL);
+
+//     while (1) {
+//         usart_putchar('A', USART_SERIAL);
+//         delay_ms(50);
+//     }
+// }
 

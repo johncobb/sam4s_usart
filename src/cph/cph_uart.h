@@ -63,8 +63,8 @@ uint32_t lib_uart_rxready(uart_cfg_t *);
 uint8_t lib_uart_read(uart_cfg_t *);
 void lib_uart_write(uart_cfg_t *, uint8_t);
 void lib_uart_writebytes(uart_cfg_t *, char*, int);
-void lib_uart_tick(uart_cfg_t *);
-
+// void lib_uart_tick(uart_cfg_t *);
+uint32_t lib_uart_tick(uart_cfg_t *);
 void uart_uart1_init(void);
 void uart_uart1_tick(void);
 uint32_t uart_uart1_rx_ready(void);
