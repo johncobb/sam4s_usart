@@ -14,6 +14,7 @@
 #include "cph_console.h"
 #include "cph_cli.h"
 #include "cph_uart.h"
+#include "stdio_serial.h"
 
 void app_init(void);
 bool app_timeout(clock_time_t);
@@ -32,13 +33,11 @@ typedef struct {
 volatile app_timer_t app_timer;
 
 
-void uart_ondatareceived(uint8_t *buffer, uint32_t len);
+void uart_ondatareceived(uint8_t data, uint32_t len);
 
-void uart_ondatareceived(uint8_t *buffer, uint32_t len) {
+void uart_ondatareceived(uint8_t data, uint32_t len) {
 
-    ioport_toggle_pin_level(LED0_GPIO);
-    delay_ms(50);
-    ioport_toggle_pin_level(LED0_GPIO);
+    lib_uart_write(&u_cfg, data);
 }
 
 void app_init(void) {
@@ -65,8 +64,13 @@ void app_uart_init(void) {
     u_cfg.on_datareceive = uart_ondatareceived;
 }
 
+
+uint8_t uc_char;
+uint8_t uc_flag;
+
 int main(void)
 {
+    
     sysclk_init();
     board_init();
     delay_init();
@@ -100,6 +104,7 @@ int main(void)
             app_settimer(&app_timer.led_timer, 100);
         }
 
+        lib_uart_tick(&u_cfg);
         delay_ms(50);
     }
 }
@@ -130,11 +135,13 @@ bool app_timeout(clock_time_t timer) {
     return false;
 }
 
-
+// #define USART_SERIAL                     UART1
+// #define USART_SERIAL_BAUDRATE            115200
+// #define USART_SERIAL_CHAR_LENGTH         US_MR_CHRL_8_BIT
+// #define USART_SERIAL_PARITY              US_MR_PAR_NO
+// #define USART_SERIAL_STOP_BIT            false
 
 // void config_usart(void) {
-
-
 //     const sam_usart_opt_t usart_console_settings = {
 //         USART_SERIAL_BAUDRATE,
 //         USART_SERIAL_CHAR_LENGTH,

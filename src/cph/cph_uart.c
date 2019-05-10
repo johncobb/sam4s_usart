@@ -47,15 +47,6 @@ uint32_t lib_uart_rxready(uart_cfg_t * u_cfg) {
     return uart_is_rx_ready(u_cfg->p_uart);
 }
 
-// uint8_t lib_uart_read(uart_cfg_t * u_cfg) {
-//  	if (lib_uart_rxready(u_cfg->p_uart)) {
-// 		uc_flag = uart_read(u_cfg->p_uart, &uc_char);
-// 		if (!uc_flag) {
-//             return uc_char;
-// 		}
-// 	}   
-// }
-
 uint8_t lib_uart_read(uart_cfg_t * u_cfg) {
  	if (uart_is_rx_ready(u_cfg->p_uart)) {
 		uc_flag = uart_read(u_cfg->p_uart, &uc_char);
@@ -82,7 +73,6 @@ void UART1_Handler() {
 
    uint32_t dw_status = uart_get_status(UART1);
    
-
    if(dw_status & UART_SR_RXRDY) {
       uint8_t received_byte;
       uart_read(UART1, &received_byte);

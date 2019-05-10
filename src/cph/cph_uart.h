@@ -22,7 +22,7 @@
 typedef void (*uart_init_func_t)(void);
 typedef void (*uart_tick_func_t)(void);
 
-typedef void (*uart_ondatareceive_func_t)(uint8_t *buffer, uint32_t len);
+typedef void (*uart_ondatareceive_func_t)(uint8_t buffer, uint32_t len);
 
 typedef struct{
     uart_ondatareceive_func_t on_datareceive;
