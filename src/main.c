@@ -24,6 +24,7 @@ void app_message(uart_cfg_t *, char *);
 
 sam_uart_opt_t sam_uart_opt;
 uart_cfg_t u_cfg;
+bool echo_terminal = true;
 
 typedef struct {
     clock_time_t log_timer;
@@ -37,7 +38,10 @@ void uart_ondatareceived(uint8_t data, uint32_t len);
 
 void uart_ondatareceived(uint8_t data, uint32_t len) {
 
-    lib_uart_write(&u_cfg, data);
+    if (echo_terminal) {
+       lib_uart_write(&u_cfg, data);
+    }
+    
 }
 
 void app_init(void) {
